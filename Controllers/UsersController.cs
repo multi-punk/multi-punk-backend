@@ -32,6 +32,20 @@ public class UsersController : ControllerBase
             return BadRequest("no such user here");
     }
 
+    [HttpPut]
+    public async Task<IActionResult> EditUser([FromBody]User user)
+    {
+        Party? dbUser= await dbContext.Party.FindAsync(user.Id);
+        if(dbUser != null)
+        {
+            dbContext.Users.Update(user);
+            await dbContext.SaveChangesAsync();
+            return Ok();
+        }
+        else    
+            return BadRequest("no such user here to edit");
+    }
+
     [HttpGet("{userId}/party")]
     public async Task<IActionResult> GetUsersParty(string userId)
     {

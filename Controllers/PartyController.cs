@@ -37,7 +37,7 @@ public class PartyController : ControllerBase
             return Ok();
         }
         else    
-            return BadRequest("no such party here");
+            return BadRequest("no such party here to edit");
     }
 
     [HttpPost]
