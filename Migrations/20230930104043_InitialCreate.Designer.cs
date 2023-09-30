@@ -11,7 +11,7 @@ using multi_api.Database;
 namespace multi_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230929141243_InitialCreate")]
+    [Migration("20230930104043_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -32,12 +32,26 @@ namespace multi_api.Migrations
                     b.Property<string>("OwnerId")
                         .HasColumnType("text");
 
-                    b.Property<string>("Participants")
-                        .HasColumnType("text");
+                    b.Property<string[]>("Participants")
+                        .HasColumnType("text[]");
 
                     b.HasKey("Id");
 
                     b.ToTable("Party", "public");
+                });
+
+            modelBuilder.Entity("multi_api.Database.Tables.Permission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions", "public");
                 });
 
             modelBuilder.Entity("multi_api.Database.Tables.Role", b =>
@@ -47,9 +61,6 @@ namespace multi_api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Permissions")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -64,6 +75,9 @@ namespace multi_api.Migrations
 
                     b.Property<string>("PartyId")
                         .HasColumnType("text");
+
+                    b.Property<string[]>("Permissions")
+                        .HasColumnType("text[]");
 
                     b.Property<string>("RoleId")
                         .HasColumnType("text");

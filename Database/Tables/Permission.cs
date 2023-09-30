@@ -3,12 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace multi_api.Database.Tables;
 
-[Table("Users",Schema = "public")]
-public class User
+[Table("Permissions",Schema = "public")]
+public class Permission
 {
     [Key]
     public string Id { get; set; }
-    public string? RoleId { get; set; }
-    public string? PartyId { get; set; }
-    public string[]? Permissions { get; set;}
+    [Required]
+    public string Name { get; set; }
 }

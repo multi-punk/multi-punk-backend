@@ -26,6 +26,24 @@ public class PartyController : ControllerBase
         return Ok(dbContext.Party.ToArray());
     }
 
+    [HttpGet("{partyId}/participants")]
+    public async Task<IActionResult> GetAllParticipants(string partyId)
+    {
+        Party? party = await dbContext.Party.FindAsync(partyId);
+        if(party != null)
+        {
+            if(party.Participants == null && party.Participants.Length < 0)
+            {
+                dbContext.Remove(party);
+                return BadRequest("user have no permissions");
+            }
+            User[] users = dbContext.Users.Where(participant => party.Participants.Contains(participant.Id)).ToArray();
+            return Ok(users);
+        }
+        else 
+            return BadRequest("no such party here");
+    }
+
     [HttpPut]
     public async Task<IActionResult> EditParty([FromBody]Party party)
     {

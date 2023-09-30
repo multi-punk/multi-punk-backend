@@ -9,5 +9,5 @@ public class Party
     [Key]
     public string Id { get; set; }
     public string? OwnerId { get; set; }
-    public string? Participants { get; set; }
+    public string[]? Participants { get; set; }
 }

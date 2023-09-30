@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using multi_api.Database;
 using multi_api.Database.Tables;
-using Microsoft.AspNetCore.Routing;
 
 namespace multi_api.Controllers;
 
@@ -69,8 +68,23 @@ public class UsersController : ControllerBase
         {
             Role? role = await dbContext.Roles.FindAsync(user.RoleId);
             if(role == null)
-                BadRequest("user have no party");
+                return BadRequest("user have no party");
             return Ok(role);
+        }
+        else 
+            return BadRequest("no such user here");
+    }
+
+    [HttpGet("{userId}/permissions")]
+    public async Task<IActionResult> GetUsersPermissions(string userId)
+    {
+        User? user = await dbContext.Users.FindAsync(userId);
+        if(user != null)
+        {
+            if(user.Permissions == null && user.Permissions.Length < 0)
+                return BadRequest("user have no permissions");
+            Permission[] permissions = dbContext.Permissions.Where(permission => user.Permissions.Contains(permission.Id)).ToArray();
+            return Ok(permissions);
         }
         else 
             return BadRequest("no such user here");

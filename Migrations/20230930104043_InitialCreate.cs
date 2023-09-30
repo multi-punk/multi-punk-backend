@@ -20,11 +20,24 @@ namespace multi_api.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     OwnerId = table.Column<string>(type: "text", nullable: true),
-                    Participants = table.Column<string>(type: "text", nullable: true)
+                    Participants = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Party", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Permissions",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Permissions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -33,8 +46,7 @@ namespace multi_api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Permissions = table.Column<string>(type: "text", nullable: true)
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,7 +60,8 @@ namespace multi_api.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     RoleId = table.Column<string>(type: "text", nullable: true),
-                    PartyId = table.Column<string>(type: "text", nullable: true)
+                    PartyId = table.Column<string>(type: "text", nullable: true),
+                    Permissions = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -61,6 +74,10 @@ namespace multi_api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Party",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "Permissions",
                 schema: "public");
 
             migrationBuilder.DropTable(
