@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using multi_api.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication;
+using multi_api.Auth;
 
 namespace multi_api;
 
@@ -23,7 +25,12 @@ public class Startup
         services
             .AddSwaggerGen()
             .AddSingleton(configuration)
-            .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")));
+            .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+            }).AddScheme<AuthenticationSchemeOptions, AuthanticationByBearerToken>("Bearer", options => { });
     }
 
 
@@ -42,6 +49,9 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
         app.UseCors();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
         {

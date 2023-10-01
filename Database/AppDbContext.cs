@@ -11,6 +11,7 @@ public class AppDbContext: DbContext
     public DbSet<Party> Party { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
+    public DbSet<ApiKey> ApiKeys{ get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
