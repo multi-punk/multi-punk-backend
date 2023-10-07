@@ -3,6 +3,7 @@ using MultiApi.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using MultiApi.Auth;
+using MultiApi.Middleware;
 
 namespace MultiApi;
 
@@ -13,7 +14,6 @@ public class Startup
     public Startup()
     {
         configuration = new ConfigurationBuilder()
-            .AddEnvironmentVariables(prefix: "m.")
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
     }
@@ -24,6 +24,8 @@ public class Startup
 
         services
             .AddSwaggerGen()
+            .AddTransient<GlobalExceptionHandlingMiddleware>()
+            .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
             .AddAuthentication(options =>
@@ -49,6 +51,9 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
         app.UseCors();
+
+        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+        app.UseMiddleware<SQLInjectionHandlingMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();

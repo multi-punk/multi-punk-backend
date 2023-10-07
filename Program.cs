@@ -13,14 +13,5 @@ public class Program
             webHost.UseKestrel(kestrelOptions => { kestrelOptions.ListenAnyIP(5005); });
         });
     }
-
-    public static bool IsDebug()
-    {
-#if DEBUG
-        return true;
-#else
-        return false;
-#endif
-    }
 }
 
