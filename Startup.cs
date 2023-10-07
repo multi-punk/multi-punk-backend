@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using multi_api.Database;
+using MultiApi.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
-using multi_api.Auth;
+using MultiApi.Auth;
 
-namespace multi_api;
+namespace MultiApi;
 
 public class Startup
 {

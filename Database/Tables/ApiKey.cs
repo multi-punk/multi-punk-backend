@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
-using multi_api.Auth;
+using MultiApi.Auth;
 
-namespace multi_api.Database.Tables;
+namespace MultiApi.Database.Tables;
 
 [Table("ApiKeys",Schema = "public")]
 public class ApiKey

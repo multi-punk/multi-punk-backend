@@ -1,7 +1,7 @@
-using multi_api.Database.Tables;
+using MultiApi.Database.Tables;
 using Microsoft.EntityFrameworkCore;
 
-namespace multi_api.Database;
+namespace MultiApi.Database;
 
 public class AppDbContext: DbContext
 {

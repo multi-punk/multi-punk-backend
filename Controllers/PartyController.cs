@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using multi_api.Database;
-using multi_api.Database.Tables;
+using MultiApi.Database;
+using MultiApi.Database.Tables;
 
-namespace multi_api.Controllers;
+namespace MultiApi.Controllers;
 
 [Authorize]
 [ApiController]

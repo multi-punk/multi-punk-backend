@@ -1,4 +1,4 @@
-namespace multi_api;
+namespace MultiApi;
 
 public class WeatherForecast
 {

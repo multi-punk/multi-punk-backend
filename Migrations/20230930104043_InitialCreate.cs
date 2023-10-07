@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace multi_api.Migrations
+namespace MultiApi.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

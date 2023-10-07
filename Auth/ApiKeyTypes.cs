@@ -1,4 +1,4 @@
-namespace multi_api.Auth;
+namespace MultiApi.Auth;
 
 public enum ApiKeyTypes
 {

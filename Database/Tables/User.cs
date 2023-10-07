@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace multi_api.Database.Tables;
+namespace MultiApi.Database.Tables;
 
 [Table("Users",Schema = "public")]
 public class User

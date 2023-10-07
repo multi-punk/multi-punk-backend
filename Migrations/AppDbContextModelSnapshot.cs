@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using multi_api.Database;
+using MultiApi.Database;
 
 #nullable disable
 
-namespace multi_api.Migrations
+namespace MultiApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -21,7 +21,7 @@ namespace multi_api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("multi_api.Database.Tables.ApiKey", b =>
+            modelBuilder.Entity("MultiApi.Database.Tables.ApiKey", b =>
                 {
                     b.Property<string>("ownerId")
                         .HasColumnType("text");
@@ -35,7 +35,7 @@ namespace multi_api.Migrations
                     b.ToTable("ApiKeys", "public");
                 });
 
-            modelBuilder.Entity("multi_api.Database.Tables.Party", b =>
+            modelBuilder.Entity("MultiApi.Database.Tables.Party", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -51,7 +51,7 @@ namespace multi_api.Migrations
                     b.ToTable("Party", "public");
                 });
 
-            modelBuilder.Entity("multi_api.Database.Tables.Permission", b =>
+            modelBuilder.Entity("MultiApi.Database.Tables.Permission", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -65,7 +65,7 @@ namespace multi_api.Migrations
                     b.ToTable("Permissions", "public");
                 });
 
-            modelBuilder.Entity("multi_api.Database.Tables.Role", b =>
+            modelBuilder.Entity("MultiApi.Database.Tables.Role", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -79,7 +79,7 @@ namespace multi_api.Migrations
                     b.ToTable("Roles", "public");
                 });
 
-            modelBuilder.Entity("multi_api.Database.Tables.User", b =>
+            modelBuilder.Entity("MultiApi.Database.Tables.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");

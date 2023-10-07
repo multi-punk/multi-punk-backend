@@ -2,9 +2,9 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using multi_api.Database;
+using MultiApi.Database;
 
-namespace multi_api.Auth;
+namespace MultiApi.Auth;
 
 public class AuthanticationByBearerToken: AuthenticationHandler<AuthenticationSchemeOptions>
 {
