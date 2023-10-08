@@ -29,7 +29,7 @@ public class AuthanticationByBearerToken: AuthenticationHandler<AuthenticationSc
 
         var providedApiKey = apiKeyHeaderValues.FirstOrDefault();
 
-        if (await IsValidApiKey(providedApiKey))
+        if (providedApiKey != null && await IsValidApiKey(providedApiKey))
         {
             var claims = new[] { new Claim("Bearer", providedApiKey) };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
