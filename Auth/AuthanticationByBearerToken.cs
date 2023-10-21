@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using MultiApi.Database;
+using MultiApi.Database.Tables;
 
 namespace MultiApi.Auth;
 
@@ -27,11 +28,15 @@ public class AuthanticationByBearerToken: AuthenticationHandler<AuthenticationSc
             return AuthenticateResult.Fail("API Key was not provided.");
         }
 
-        var providedApiKey = apiKeyHeaderValues.FirstOrDefault();
+        string providedApiKey = apiKeyHeaderValues.FirstOrDefault();
 
         if (providedApiKey != null && await IsValidApiKey(providedApiKey))
         {
-            var claims = new[] { new Claim("Bearer", providedApiKey) };
+            ApiKey apiKey = dbContext.ApiKeys.Find(providedApiKey.Replace("Bearer ", ""));
+            var claims = new[] 
+            {
+                new Claim(ClaimTypes.Role, apiKey.type.ToString())
+            };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);

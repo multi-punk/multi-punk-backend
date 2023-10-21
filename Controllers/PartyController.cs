@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,9 +7,9 @@ using MultiApi.Database.Tables;
 
 namespace MultiApi.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Private")]
 public class PartyController : ControllerBase
 {
     private AppDbContext dbContext;
@@ -22,6 +23,16 @@ public class PartyController : ControllerBase
     public async Task<IActionResult> GetAllParty()
     {
         return Ok(dbContext.Party.ToArray());
+    }
+
+    [HttpGet("{partyId}")]
+    public async Task<IActionResult> GetUser(string partyId)
+    {
+        Party? party = await dbContext.Party.FindAsync(partyId);
+        if(party != null)
+            return Ok(party);
+        else 
+            return BadRequest("no such party here");
     }
 
     [HttpGet("{partyId}/participants")]
