@@ -23,7 +23,6 @@ public class Startup
         services.AddControllers();
 
         services
-            .AddSwaggerGen()
             .AddTransient<GlobalExceptionHandlingMiddleware>()
             .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddSingleton(configuration)
@@ -41,11 +40,6 @@ public class Startup
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Employee API V1");
-            });
         }
 
         app.UseStaticFiles();
