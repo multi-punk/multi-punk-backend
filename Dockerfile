@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
-WORKDIR /
+WORKDIR /App
 
 # Copy everything
 COPY . ./
@@ -10,6 +10,6 @@ RUN dotnet publish -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
-WORKDIR /
-COPY --from=build-env /out .
+WORKDIR /App
+COPY --from=build-env /App/out .
 ENTRYPOINT ["dotnet", "MultiApi.dll"]
