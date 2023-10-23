@@ -14,7 +14,7 @@ public class Startup
     public Startup()
     {
         configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile("Settings/appsettings.json", optional: false)
             .Build();
     }
 

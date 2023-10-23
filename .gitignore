@@ -1,6 +1,7 @@
 /.vscode
 /bin
 /obj
+appsettings.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
