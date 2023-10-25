@@ -12,8 +12,8 @@ namespace MultiApi.Database.Tables;
 public class ApiKey
 {
     [Key]
-    public string ownerId { get; set; }
-    [Required]
     public string Key { get; set; }
+    [Required]
+    public string ownerId { get; set; }
     public ApiKeyTypes type { get; set; }
 }

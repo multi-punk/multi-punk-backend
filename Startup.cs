@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using MultiApi.Auth;
 using MultiApi.Middleware;
+using Microsoft.Extensions.Options;
 
 namespace MultiApi;
 
@@ -28,11 +29,22 @@ public class Startup
             .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
+            .AddAuthorization(options => 
+            {
+                options.AddPolicy("MULTI-API-KEY-PRIVATE", policyBuilder => {
+                    policyBuilder.RequireAuthenticatedUser();
+                    policyBuilder.RequireClaim("KEY-TYPE", "Private");
+                });
+                options.AddPolicy("MULTI-API-KEY-PUBLIC", policyBuilder => {
+                    policyBuilder.RequireAuthenticatedUser();
+                    policyBuilder.RequireClaim("KEY-TYPE", "Public");
+                });
+            })
             .AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = "Bearer";
-                options.DefaultChallengeScheme = "Bearer";
-            }).AddScheme<AuthenticationSchemeOptions, AuthanticationByBearerToken>("Bearer", options => { });
+                options.DefaultAuthenticateScheme = "MULTI-API-KEY";
+                options.DefaultChallengeScheme = "MULTI-API-KEY";
+            }).AddScheme<AuthenticationSchemeOptions, ApiKeyAuthantication>("MULTI-API-KEY", options => { });
     }
 
 
@@ -52,7 +64,7 @@ public class Startup
         app.UseRouting();
         app.UseCors();
 
-        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+        // app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         app.UseMiddleware<SQLInjectionHandlingMiddleware>();
 
         app.UseAuthentication();

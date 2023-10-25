@@ -9,7 +9,7 @@ namespace MultiApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Private")]
+[Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
 public class PartyController : ControllerBase
 {
     private AppDbContext dbContext;

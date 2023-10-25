@@ -7,48 +7,50 @@ using MultiApi.Database.Tables;
 
 namespace MultiApi.Auth;
 
-public class AuthanticationByBearerToken: AuthenticationHandler<AuthenticationSchemeOptions>
+public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private AppDbContext dbContext;
 
-    public AuthanticationByBearerToken(
+    public ApiKeyAuthantication
+    (
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         ISystemClock clock,
-        AppDbContext dbContext) : base(options, logger, encoder, clock)
+        AppDbContext dbContext
+    ) : base(options, logger, encoder, clock)
     {
         this.dbContext = dbContext;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("Authorization", out var apiKeyHeaderValues))
-        {
+        if (!Request.Headers.TryGetValue("MULTI-API-KEY", out var apiKeyHeaderValues))
             return AuthenticateResult.Fail("API Key was not provided.");
-        }
 
-        string providedApiKey = apiKeyHeaderValues.FirstOrDefault();
+        string? providedApiKey = apiKeyHeaderValues.FirstOrDefault();
+        Console.WriteLine(providedApiKey);
 
-        if (providedApiKey != null && await IsValidApiKey(providedApiKey))
+        if (FindApiKey(providedApiKey, out ApiKey apiKey))
         {
-            ApiKey apiKey = dbContext.ApiKeys.Find(providedApiKey.Replace("Bearer ", ""));
             var claims = new[] 
             {
-                new Claim(ClaimTypes.Role, apiKey.type.ToString())
+                new Claim("KEY-TYPE", apiKey.type.ToString())
             };
+
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
             return AuthenticateResult.Success(ticket);
         }
-
+        Console.WriteLine("im there");
         return AuthenticateResult.Fail("Invalid API Key provided.");
     }
 
-    private async Task<bool> IsValidApiKey(string apiKey)
+    private bool FindApiKey(string? providedApiKey, out ApiKey? apiKey)
     {
-        return dbContext.ApiKeys.Any(key => key.Key == apiKey.Replace("Bearer ", ""));
+        apiKey = dbContext.ApiKeys.Find(providedApiKey);
+        return dbContext.ApiKeys.Any(key => key.Key == providedApiKey);
     }
 }
