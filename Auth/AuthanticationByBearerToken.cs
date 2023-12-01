@@ -9,18 +9,17 @@ namespace MultiApi.Auth;
 
 public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private AppDbContext dbContext;
+    private AppDbContext ctx;
 
-    public ApiKeyAuthantication
-    (
+    public ApiKeyAuthantication (
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         ISystemClock clock,
-        AppDbContext dbContext
+        AppDbContext ctx
     ) : base(options, logger, encoder, clock)
     {
-        this.dbContext = dbContext;
+        this.ctx = ctx;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -50,7 +49,7 @@ public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOpt
 
     private bool FindApiKey(string? providedApiKey, out ApiKey? apiKey)
     {
-        apiKey = dbContext.ApiKeys.Find(providedApiKey);
-        return dbContext.ApiKeys.Any(key => key.Key == providedApiKey);
+        apiKey = ctx.ApiKeys.Find(providedApiKey);
+        return ctx.ApiKeys.Any(key => key.Key == providedApiKey);
     }
 }

@@ -1,16 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using MultiApi.Database;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using MultiApi.Auth;
 using MultiApi.Middleware;
-using Microsoft.Extensions.Options;
+using MultiApi.Hubs;
+using MultiApi.Database.Tables;
 
 namespace MultiApi;
 
 public class Startup
 {
     private readonly IConfiguration configuration;
+    private List<User> users = new List<User>();
 
     public Startup()
     {
@@ -22,11 +23,13 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        services.AddSignalR();
 
         services
             .AddSwaggerGen()
             .AddTransient<GlobalExceptionHandlingMiddleware>()
             .AddTransient<SQLInjectionHandlingMiddleware>()
+            .AddSingleton(users)
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
             .AddAuthorization(options => 
@@ -60,12 +63,11 @@ public class Startup
             });
         }
 
-        app.UseStaticFiles();
         app.UseRouting();
         app.UseCors();
 
         // app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
-        app.UseMiddleware<SQLInjectionHandlingMiddleware>();
+        // app.UseMiddleware<SQLInjectionHandlingMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -73,6 +75,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHub<QueueHub>("api/hubs/queue-hub");
         });
     }
 }

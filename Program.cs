@@ -2,8 +2,8 @@
 
 public class Program
 {
-    static void Main()
-        => CreateHostBuilder().Build().Run();
+    static async Task Main()
+        => await CreateHostBuilder().Build().RunAsync();
 
     private static IHostBuilder CreateHostBuilder() 
     {

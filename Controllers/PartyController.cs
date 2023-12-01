@@ -10,88 +10,73 @@ namespace MultiApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
-public class PartyController : ControllerBase
+public class PartyController(AppDbContext ctx) : ControllerBase
 {
-    private AppDbContext dbContext;
-
-    public PartyController(AppDbContext dbContext)
-    {
-        this.dbContext = dbContext;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetAllParty()
     {
-        return Ok(dbContext.Party.ToArray());
+        return Ok(ctx.Party);
     }
 
     [HttpGet("{partyId}")]
     public async Task<IActionResult> GetUser(string partyId)
     {
-        Party? party = await dbContext.Party.FindAsync(partyId);
-        if(party != null)
-            return Ok(party);
-        else 
+        Party? party = await ctx.Party.FindAsync(partyId);
+        if(party == null)
             return BadRequest("no such party here");
+
+        return Ok(party);       
     }
 
     [HttpGet("{partyId}/participants")]
     public async Task<IActionResult> GetAllParticipants(string partyId)
     {
-        Party? party = await dbContext.Party.FindAsync(partyId);
-        if(party != null)
-        {
-            if(party.Participants == null && party.Participants.Length < 0)
-            {
-                dbContext.Remove(party);
-                return BadRequest("user have no permissions");
-            }
-            User[] users = dbContext.Users.Where(participant => party.Participants.Contains(participant.Id)).ToArray();
-            return Ok(users);
-        }
-        else 
+
+        Party? party = await ctx.Party.FindAsync(partyId);
+        if(party == null)
             return BadRequest("no such party here");
+
+        if(party.Participants == null || party.Participants.Count < 0)
+        {
+            ctx.Remove(party);
+            return BadRequest("user have no permissions");
+        }
+        User[] users = ctx.Users.Where(user => party.Participants.Contains(user.Id)).ToArray();
+        
+        return Ok(users);            
     }
 
     [HttpPut]
     public async Task<IActionResult> EditParty([FromBody]Party party)
     {
-        Party? dbParty = await dbContext.Party.FindAsync(party.Id);
-        if(dbParty != null)
-        {
-            dbContext.Party.Update(party);
-            await dbContext.SaveChangesAsync();
-            return Ok();
-        }
-        else    
+        if(!ctx.Party.Any(p => p.Id == party.Id))
             return BadRequest("no such party here to edit");
+
+        ctx.Party.Update(party);
+        await ctx.SaveChangesAsync();
+        return Ok();  
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateParty([FromBody]Party party)
     {
-        Party? dbParty = await dbContext.Party.FindAsync(party.Id);
-        if(dbParty == null)
-        {
-            await dbContext.Party.AddAsync(party);
-            await dbContext.SaveChangesAsync();
-            return Ok();
-        }
-        else
+        if(ctx.Party.Any(p => p.Id == party.Id))
             return BadRequest("current party already exists");
+
+        await ctx.Party.AddAsync(party);
+        await ctx.SaveChangesAsync();
+        return Ok();
     }
 
     [HttpDelete("{partyId}")]
     public async Task<IActionResult> DeleteParty(string partyId)
     {
-        Party? party = await dbContext.Party.FindAsync(partyId);
-        if(party != null)
-        {
-            dbContext.Party.Remove(party);
-            await dbContext.SaveChangesAsync();
-            return Ok();
-        }
-        else    
+        Party? party = await ctx.Party.FindAsync(partyId);
+        if(party == null)
             return BadRequest("no such party here");
+
+        ctx.Party.Remove(party);
+        await ctx.SaveChangesAsync();
+        return Ok();        
     }
 }
