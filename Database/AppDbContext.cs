@@ -13,6 +13,7 @@ public class AppDbContext: DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<ApiKey> ApiKeys { get; set; }
     public DbSet<Statistic> Statistics { get; set; }
+    public DbSet<Game> Games { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

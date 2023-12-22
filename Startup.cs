@@ -11,7 +11,7 @@ namespace MultiApi;
 public class Startup
 {
     private readonly IConfiguration configuration;
-    private List<User> users = new List<User>();
+    private List<string> users = new List<string>();
 
     public Startup()
     {
@@ -29,7 +29,7 @@ public class Startup
             .AddSwaggerGen()
             .AddTransient<GlobalExceptionHandlingMiddleware>()
             .AddTransient<SQLInjectionHandlingMiddleware>()
-            .AddSingleton(users)
+            .AddSingleton<TempDataProvider>()
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
             .AddAuthorization(options => 

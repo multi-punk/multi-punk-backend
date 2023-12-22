@@ -11,7 +11,9 @@ namespace MultiApi.Database.Tables;
 public class Statistic
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
     public string UserId { get; set; }
     public string Game { get; set; }
-    public int score { get; set; }
+    public int Score { get; set; }
 }

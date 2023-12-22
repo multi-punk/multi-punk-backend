@@ -5,9 +5,9 @@ using MultiApi.Database.Tables;
 
 namespace MultiApi.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
 public class UsersController(AppDbContext ctx) : ControllerBase
 {
     [HttpGet]
@@ -36,20 +36,6 @@ public class UsersController(AppDbContext ctx) : ControllerBase
         await ctx.SaveChangesAsync();
 
         return Ok();       
-    }
-
-    [HttpGet("{userId}/party")]
-    public async Task<IActionResult> GetUsersParty(string userId)
-    {
-        User? user = await ctx.Users.FindAsync(userId);
-        if(user == null)
-            return BadRequest("no such user here");
-
-        Party? party = await ctx.Party.FindAsync(user.PartyId);
-        if(party == null)
-            BadRequest("user have no party");
-
-        return Ok(party);   
     }
 
     [HttpGet("{userId}/role")]
@@ -86,9 +72,22 @@ public class UsersController(AppDbContext ctx) : ControllerBase
     {
         if(ctx.Users.Any(p => p.Id == user.Id))
             return BadRequest("current user already exists");
-            
+
+        foreach(var game in ctx.Games)
+            await ctx.Statistics.AddAsync(new Statistic(){
+                UserId = user.Id,
+                Game = game.Id,
+                Score = 0
+            });        
         await ctx.Users.AddAsync(user);
         await ctx.SaveChangesAsync();
         return Ok();   
+    }
+
+    [HttpGet("{userId}/statistic")]
+    public async Task<IActionResult> GetUsersStatistic(string userId)
+    {
+        var statistic = ctx.Statistics.Where(s => s.UserId == userId);
+        return Ok(statistic);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -10,18 +11,28 @@ using MultiApi.Database.Tables;
 
 namespace MultiApi.Hubs;
 
-public sealed class QueueHub(AppDbContext ctx, List<User> users): Hub
+[AllowAnonymous]
+public sealed class QueueHub: Hub
 {
+    private Dictionary<string, List<string>> PlayersInQueue;
+
+    public QueueHub(TempDataProvider dataProvider)
+    {
+        PlayersInQueue = dataProvider.PlayersInQueue;
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        await Clients.Caller.SendAsync("Users", PlayersInQueue);
+    }
     public async Task AddUser(string userXUId, string game)
     {
-        users.Add(new User{
-            XUId = userXUId
-        });
-        await Clients.All.SendAsync("AddUser", users);
+        PlayersInQueue[game]?.Add(userXUId);
+        await Clients.All.SendAsync("Users", PlayersInQueue);
     }
     public async Task RemoveUser(string userXUId, string game)
     {
-        users.RemoveAll(x => x.XUId == userXUId);
-        await Clients.All.SendAsync("RemoveUser", users);
+        PlayersInQueue[game]?.Remove(userXUId);
+        await Clients.All.SendAsync("Users", PlayersInQueue);
     }
 }

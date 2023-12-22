@@ -28,7 +28,7 @@ public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOpt
             return AuthenticateResult.Fail("API Key was not provided.");
 
         string? providedApiKey = apiKeyHeaderValues.FirstOrDefault();
-        Console.WriteLine(providedApiKey);
+        Console.WriteLine("APIKEY: "+providedApiKey);
 
         if (FindApiKey(providedApiKey, out ApiKey apiKey))
         {
