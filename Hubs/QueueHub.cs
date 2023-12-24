@@ -26,16 +26,16 @@ public sealed class QueueHub: Hub
     public override async Task OnConnectedAsync()
     {
         foreach(var game in ctx.Games)
-            await Clients.Caller.SendAsync("UsersInQueue", game.Id, queues[game.Id]);
+            await Clients.Caller.SendAsync("ChangeQueue", game.Id, queues[game.Id]);
     }
     public async Task AddUser(string userXUId, string game)
     {
         queues[game]?.Add(userXUId);
-        await Clients.All.SendAsync("UsersInQueue", game, queues[game]);
+        await Clients.All.SendAsync("ChangeQueue", game, queues[game]);
     }
     public async Task RemoveUser(string userXUId, string game)
     {
         queues[game]?.Remove(userXUId);
-        await Clients.All.SendAsync("UsersInQueue", game, queues[game]);
+        await Clients.All.SendAsync("ChangeQueue", game, queues[game]);
     }
 }
