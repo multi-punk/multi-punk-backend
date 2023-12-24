@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace MultiApi.Database.Tables;
 
-[Table("Statistic",Schema = "public")]
-public class Statistic
+[Table("Servers",Schema = "public")]
+public class Server
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    public string UserId { get; set; }
-    public string GameId { get; set; }
-    public int Score { get; set; }
+    public string URL { get; set; }
+    public int Port { get; set; }
+    public bool IsInUse { get; set; }
 }

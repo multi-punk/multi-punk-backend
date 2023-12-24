@@ -14,6 +14,6 @@ public class ApiKey
     [Key]
     public string Key { get; set; }
     [Required]
-    public string ownerId { get; set; }
-    public ApiKeyTypes type { get; set; }
+    public string OwnerId { get; set; }
+    public ApiKeyTypes Type { get; set; }
 }

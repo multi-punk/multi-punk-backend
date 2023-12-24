@@ -34,7 +34,7 @@ public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOpt
         {
             var claims = new[] 
             {
-                new Claim("KEY-TYPE", apiKey.type.ToString())
+                new Claim("KEY-TYPE", apiKey.Type.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);

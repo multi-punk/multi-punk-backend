@@ -76,7 +76,7 @@ public class UsersController(AppDbContext ctx) : ControllerBase
         foreach(var game in ctx.Games)
             await ctx.Statistics.AddAsync(new Statistic(){
                 UserId = user.Id,
-                Game = game.Id,
+                GameId = game.Id,
                 Score = 0
             });        
         await ctx.Users.AddAsync(user);

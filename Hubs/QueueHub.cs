@@ -14,25 +14,28 @@ namespace MultiApi.Hubs;
 [AllowAnonymous]
 public sealed class QueueHub: Hub
 {
-    private Dictionary<string, List<string>> PlayersInQueue;
+    private Dictionary<string, List<string>> queues;
+    private AppDbContext ctx;
 
-    public QueueHub(TempDataProvider dataProvider)
+    public QueueHub(TempDataProvider dataProvider, AppDbContext ctx)
     {
-        PlayersInQueue = dataProvider.PlayersInQueue;
+        queues = dataProvider.Queues;
+        this.ctx = ctx;
     }
 
     public override async Task OnConnectedAsync()
     {
-        await Clients.Caller.SendAsync("Users", PlayersInQueue);
+        foreach(var game in ctx.Games)
+            await Clients.Caller.SendAsync("UsersInQueue", game.Id, queues[game.Id]);
     }
     public async Task AddUser(string userXUId, string game)
     {
-        PlayersInQueue[game]?.Add(userXUId);
-        await Clients.All.SendAsync("Users", PlayersInQueue);
+        queues[game]?.Add(userXUId);
+        await Clients.All.SendAsync("UsersInQueue", game, queues[game]);
     }
     public async Task RemoveUser(string userXUId, string game)
     {
-        PlayersInQueue[game]?.Remove(userXUId);
-        await Clients.All.SendAsync("Users", PlayersInQueue);
+        queues[game]?.Remove(userXUId);
+        await Clients.All.SendAsync("UsersInQueue", game, queues[game]);
     }
 }
