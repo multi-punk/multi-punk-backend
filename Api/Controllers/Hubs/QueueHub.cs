@@ -34,6 +34,13 @@ public sealed class QueueHub: Hub<IQueueHub>
     {
         queues[gameId]?.Add(userXUId);
         await Clients.All.ChangeQueue(gameId, queues[gameId]);
+        var thatGame = ctx.Games.First(k => k.Id == gameId);
+        if (queues[gameId]?.Count > thatGame.MinPlayersCount)
+        {
+            var thisServer = ctx.Servers.First(k => k.GameId == gameId);
+            thisServer.IsInUse = true;
+            ctx.Servers.Update(thisServer);
+        }
     }
 
     public async Task RemoveUser(string userXUId, string gameId)
