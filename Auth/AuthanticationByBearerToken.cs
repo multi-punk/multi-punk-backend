@@ -43,7 +43,6 @@ public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOpt
 
             return AuthenticateResult.Success(ticket);
         }
-        Console.WriteLine("im there");
         return AuthenticateResult.Fail("Invalid API Key provided.");
     }
 

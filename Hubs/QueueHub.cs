@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
+using MultiApi.Contracts.Hubs;
 using MultiApi.Database;
 using MultiApi.Database.Tables;
 
 namespace MultiApi.Hubs;
 
 [AllowAnonymous]
-public sealed class QueueHub: Hub
+public sealed class QueueHub: Hub<IQueueHub>
 {
     private Dictionary<string, List<string>> queues;
     private AppDbContext ctx;
@@ -26,16 +27,27 @@ public sealed class QueueHub: Hub
     public override async Task OnConnectedAsync()
     {
         foreach(var game in ctx.Games)
-            await Clients.Caller.SendAsync("ChangeQueue", game.Id, queues[game.Id]);
+            await Clients.Caller.ChangeQueue(game.Id, queues[game.Id]);
     }
-    public async Task AddUser(string userXUId, string game)
+    
+    public async Task AddUser(string userXUId, string gameId)
     {
-        queues[game]?.Add(userXUId);
-        await Clients.All.SendAsync("ChangeQueue", game, queues[game]);
+        queues[gameId]?.Add(userXUId);
+        await Clients.All.ChangeQueue(gameId, queues[gameId]);
     }
-    public async Task RemoveUser(string userXUId, string game)
+
+    public async Task RemoveUser(string userXUId, string gameId)
     {
-        queues[game]?.Remove(userXUId);
-        await Clients.All.SendAsync("ChangeQueue", game, queues[game]);
+        queues[gameId]?.Remove(userXUId);
+        await Clients.All.ChangeQueue(gameId, queues[gameId]);
     }
+
+    // public async Task StartCountdown(string gameId, Server server)
+    // {
+    //     await Clients.All.StartCountdown(gameId, queues[gameId], server);
+    // }
+    // public async Task StopCountdown(string gameId)
+    // {
+    //     await Clients.All.StopCountdown(gameId, queues[gameId]);
+    // }
 }
