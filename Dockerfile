@@ -17,4 +17,4 @@ COPY --from=build-env /App/out .
 EXPOSE 5005
 VOLUME [ "/settings" ]
 
-ENTRYPOINT ["dotnet", "MultiApi.dll"]
+ENTRYPOINT ["dotnet", "Api.dll"]
