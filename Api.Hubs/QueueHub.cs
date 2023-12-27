@@ -1,25 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
 using App.Contracts.Hubs;
 using Infrastructure.Database;
-using Infrastructure.Database.Tables;
+using App.Contracts;
 
-namespace Api.Controllers.Hubs;
+namespace Api.Hubs;
 
 [AllowAnonymous]
 public sealed class QueueHub: Hub<IQueueHub>
 {
     private Dictionary<string, List<string>> queues;
     private AppDbContext ctx;
+    private IQueueService service;
 
-    public QueueHub(TempDataProvider dataProvider, AppDbContext ctx)
+    public QueueHub(TempDataProvider dataProvider, AppDbContext ctx, IQueueService service)
     {
+        this.service = service;
         queues = dataProvider.Queues;
         this.ctx = ctx;
     }
@@ -45,6 +41,7 @@ public sealed class QueueHub: Hub<IQueueHub>
 
     public async Task RemoveUser(string userXUId, string gameId)
     {
+        await service.ChangeQueue(userXUId, gameId);
         queues[gameId]?.Remove(userXUId);
         await Clients.All.ChangeQueue(gameId, queues[gameId]);
     }

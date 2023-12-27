@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Api;
+namespace Infrastructure.Database;
 
 public class TempDataProvider
 {

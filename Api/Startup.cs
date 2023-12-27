@@ -3,7 +3,10 @@ using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
 using Api.Auth;
 using Api.Middleware;
-using Api.Controllers.Hubs;
+using Api.Hubs;
+using App.Contracts.Hubs;
+using App.Contracts;
+using App.Queue;
 
 namespace Api;
 
@@ -27,6 +30,7 @@ public class Startup
 
         services
             .AddSwaggerGen()
+            .AddTransient<IQueueService, QueueService>() 
             .AddTransient<GlobalExceptionHandlingMiddleware>()
             .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddSingleton<TempDataProvider>()

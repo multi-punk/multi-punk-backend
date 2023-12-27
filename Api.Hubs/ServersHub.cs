@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Api.Controllers.Hubs;
+namespace Api.Hubs;
 
 public class ServersHub: Hub
 {

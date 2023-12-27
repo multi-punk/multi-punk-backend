@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure.Database\Infrastructure.Database.csproj" />
     <ProjectReference Include="..\App\App.csproj" />
+    <ProjectReference Include="..\Api.Hubs\Api.Hubs.csproj" />
+    <ProjectReference Include="..\App.Contracts\App.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
