@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
-using Api.Contracts.Hubs;
+using App.Contracts.Hubs;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
 
