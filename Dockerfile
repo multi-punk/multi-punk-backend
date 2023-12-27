@@ -14,7 +14,7 @@ WORKDIR /App
 COPY --from=build-env /App/out .
 
 # Exposing port for docker container
-EXPOSE 5005
-VOLUME [ "/settings" ]
+EXPOSE 5005/tcp
+EXPOSE 5005/udp
 
 ENTRYPOINT ["dotnet", "Api.dll"]
