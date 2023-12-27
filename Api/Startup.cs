@@ -10,13 +10,14 @@ namespace Api;
 public class Startup
 {
     private readonly IConfiguration configuration;
-    private List<string> users = new List<string>();
-
+    private List<string> users = new ();
+    private string? connectionString = null;
     public Startup()
     {
         configuration = new ConfigurationBuilder()
             .AddJsonFile("Settings/appsettings.json", optional: false)
             .Build();
+        connectionString = Environment.GetEnvironmentVariable("connectionString") ?? configuration.GetValue<string>("connectionOnServer");
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -30,7 +31,7 @@ public class Startup
             .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddSingleton<TempDataProvider>()
             .AddSingleton(configuration)
-            .AddDbContext<AppDbContext>(c => c.UseNpgsql(configuration.GetValue<string>("connectionOnServer")))
+            .AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionString))
             .AddAuthorization(options => 
             {
                 options.AddPolicy("MULTI-API-KEY-PRIVATE", policyBuilder => {
