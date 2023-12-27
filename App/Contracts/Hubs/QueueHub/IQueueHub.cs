@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Database.Tables;
 
-namespace Api.Contracts.Hubs;
+namespace App.Contracts.Hubs;
 
 public interface IQueueHub
 {

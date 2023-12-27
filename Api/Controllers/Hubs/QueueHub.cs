@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
-using Api.Contracts.Hubs;
+using App.Contracts.Hubs;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
 
@@ -34,6 +34,13 @@ public sealed class QueueHub: Hub<IQueueHub>
     {
         queues[gameId]?.Add(userXUId);
         await Clients.All.ChangeQueue(gameId, queues[gameId]);
+        var thatGame = ctx.Games.First(k => k.Id == gameId);
+        if (queues[gameId]?.Count > thatGame.MinPlayersCount)
+        {
+            var thisServer = ctx.Servers.First(k => k.GameId == gameId);
+            thisServer.IsInUse = true;
+            ctx.Servers.Update(thisServer);
+        }
     }
 
     public async Task RemoveUser(string userXUId, string gameId)
