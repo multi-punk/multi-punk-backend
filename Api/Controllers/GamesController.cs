@@ -7,30 +7,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
+using App.Contracts.Games;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
-public class GamesController(AppDbContext ctx) : ControllerBase
+public class GamesController(IGameReader gameReader, IGameWriter gameWriter) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetGames()
-        => Ok(ctx.Games);
+        => Ok(await gameReader.GetAllGames());
 
     [HttpPost]
     public async Task<IActionResult> AddGames([FromBody] Game[] games)
     {
-        await ctx.Games.AddRangeAsync(games); 
-        await ctx.SaveChangesAsync();
+        await gameWriter.AddGames(games);
         return Ok();
     }
 
     [HttpDelete]
     public async Task<IActionResult> RemoveGames([FromBody] string[] gamesIds)
     {
-        await ctx.Games.Where(x => gamesIds.Contains(x.Id)).ExecuteDeleteAsync();
+        await gameWriter.RemoveGames(gamesIds);
         return Ok();
     }
 }
