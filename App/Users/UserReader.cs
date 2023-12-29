@@ -11,7 +11,7 @@ namespace App.Users;
 public class UserReader(AppDbContext ctx) : IUserReader
 {
     public async Task<IEnumerable<User>> GetAllUsers()
-        => ctx.Users;
+        => ctx.Users.ToList();
 
     public async Task<User> GetUser(string userId)
     {

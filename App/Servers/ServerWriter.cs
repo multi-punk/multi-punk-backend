@@ -14,11 +14,13 @@ public class ServerWriter(AppDbContext ctx) : IServerWriter
     {
         Server server = await ctx.Servers.FindAsync(id);
         server.IsInUse = false;
+        await ctx.SaveChangesAsync();
     }
 
     public async Task ReserveServer(int id)
     {
         Server server = await ctx.Servers.FindAsync(id);
         server.IsInUse = true;
+        await ctx.SaveChangesAsync();
     }
 }

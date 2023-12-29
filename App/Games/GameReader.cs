@@ -11,5 +11,5 @@ namespace App.Games;
 public class GameReader(AppDbContext ctx) : IGameReader
 {
     public async Task<IEnumerable<Game>> GetAllGames()
-        => ctx.Games;
+        => ctx.Games.ToList();
 }

@@ -12,13 +12,13 @@ public class StatisticReader(AppDbContext ctx) : IStatisticReader
 {
     public async Task<IEnumerable<Statistic>> GetStatisticByGameId(string gameId)
     {
-        var statistic = ctx.Statistics.Where(x => x.GameId == gameId);
+        var statistic = ctx.Statistics.Where(x => x.GameId == gameId).ToList();
         return statistic;
     }
 
     public async Task<IEnumerable<Statistic>> GetStatisticByUserId(string userId)
     {
-        var statistic = ctx.Statistics.Where(x => x.UserId == userId);
+        var statistic = ctx.Statistics.Where(x => x.UserId == userId).ToList();
         return statistic;
     }
 }

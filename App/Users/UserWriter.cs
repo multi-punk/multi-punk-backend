@@ -7,6 +7,7 @@ using App.Contracts.Statistics;
 using App.Contracts.Users;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Users;
 
@@ -26,6 +27,7 @@ public class UserWriter(AppDbContext ctx, IGameReader gameReader, IStatisticWrit
                     Score = 0
                 }
             );
+
         await ctx.SaveChangesAsync();
     }
 
