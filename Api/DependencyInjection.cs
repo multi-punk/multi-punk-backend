@@ -27,6 +27,8 @@ public static class DependencyInjection
             .AddTransient<GlobalExceptionHandlingMiddleware>()
             .AddTransient<SQLInjectionHandlingMiddleware>()
             .AddTransient<IGameWriter, GameWriter>()
+            .AddTransient<IGameReader, GameReader>()
+            .AddTransient<IServerReader, ServerReader>()
             .AddTransient<IServerWriter, ServerWriter>()
             .AddTransient<IStatisticReader, StatisticReader>()
             .AddTransient<IStatisticWriter, StatisticWriter>()
