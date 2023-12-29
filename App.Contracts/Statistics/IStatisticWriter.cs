@@ -9,4 +9,5 @@ namespace App.Contracts.Statistics;
 public interface IStatisticWriter
 {
     Task EditStatistic(Statistic statistic);
+    Task CreateStatistic(Statistic statistic);
 }

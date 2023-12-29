@@ -15,9 +15,7 @@ public class UserReader(AppDbContext ctx) : IUserReader
 
     public async Task<User> GetUser(string userId)
     {
-        User? user = await ctx.Users.FindAsync(userId);
-        if(user is null)
-            throw new ArgumentNullException("no such user here");
+        User user = await ctx.Users.FindAsync(userId);
         return user;
     }
 }
