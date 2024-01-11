@@ -12,23 +12,58 @@ namespace App.Queue;
 public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider): IQueueService
 {
     private Dictionary<string, List<string>> queue = provider.Queues;
-    public async Task ChangeQueue(string userXUId, string gameId, ChangeQueueType type)
+    public async Task AddUser(string userXUId, string gameId)
     {
-        var playerServer = ctx.Servers.FirstOrDefault(k => k.GameId == gameId);
-        if (playerServer == null) return;
-        var game = ctx.Games.FirstOrDefault(k => k.Id == gameId);
-        if (queue[gameId].First().Length < game.MinPlayersCount)
+        var server = ctx
+            .Servers
+            .FirstOrDefault(s => s.GameId == gameId && !s.IsInUse);
+        if (server == null) return;
+        var game = ctx
+            .Games
+            .FirstOrDefault(k => k.Id == gameId);
+        queue[gameId].Add(userXUId);
+        if (queue[gameId].Count() == game.MinPlayersCount)
         {
-            playerServer.IsInUse = false;
-            playerServer.GameId = null;
-            ctx.Servers.Update(playerServer);
-            await hub.Clients.All.StopCountdown(gameId, queue[gameId]);
+            server.IsInUse = true;
+            ctx.Servers.Update(server);
+            await hub
+                .Clients
+                .All
+                .StartCountdown(gameId, queue[gameId], server);
         }
         else
+            await hub
+                .Clients
+                .All
+                .ChangeQueue(gameId, queue[gameId]);
+        
+        await ctx.SaveChangesAsync();
+    }
+    public async Task RemoveUser(string userXUId, string gameId)
+    {
+        var server = ctx
+            .Servers
+            .FirstOrDefault(s => s.GameId == gameId && s.IsInUse);
+        if (server == null) return;
+        var game = ctx
+            .Games
+            .FirstOrDefault(k => k.Id == gameId);
+        queue[gameId].Remove(userXUId);
+        if (queue[gameId].Count() < game.MinPlayersCount)
         {
-            await hub.Clients.All.StartCountdown(gameId, queue[gameId], playerServer);
+            server.IsInUse = false;
+            ctx.Servers.Update(server);
+            await hub
+                .Clients
+                .All
+                .StopCountdown(gameId, queue[gameId]);
         }
-        if (queue[gameId].First().Length < game.MaxPlayersCount)
-            await hub.Clients.All.ChangeQueue(gameId, queue[gameId]);
+        else
+            await hub
+                .Clients
+                .All
+                .ChangeQueue(gameId, queue[gameId]);
+        
+        await ctx.SaveChangesAsync();
     }
 }
