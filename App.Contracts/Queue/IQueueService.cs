@@ -1,3 +1,4 @@
+using App.Contracts.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,5 +8,5 @@ namespace App.Contracts;
 
 public interface IQueueService
 {
-    Task ChangeQueue(string userXUId, string gameId);
+    Task ChangeQueue(string userXUId, string gameId, ChangeQueueType type);
 }
