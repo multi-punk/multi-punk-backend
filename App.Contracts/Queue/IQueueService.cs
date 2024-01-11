@@ -8,5 +8,6 @@ namespace App.Contracts;
 
 public interface IQueueService
 {
-    Task ChangeQueue(string userXUId, string gameId, ChangeQueueType type);
+    Task AddUser(string userXUId, string gameId);
+    Task RemoveUser(string userXUid, string gameId);
 }
