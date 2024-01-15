@@ -29,11 +29,7 @@ public class Startup
         services.AddSignalR();
 
         services
-            .AddSwaggerGen()
-            .AddTransient<IQueueService, QueueService>() 
-            .AddTransient<GlobalExceptionHandlingMiddleware>()
-            .AddTransient<SQLInjectionHandlingMiddleware>()
-            .AddSingleton<TempDataProvider>()
+            .RegisterServices()
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionString))
             .AddAuthorization(options => 
