@@ -27,24 +27,10 @@ public sealed class QueueHub: Hub<IQueueHub>
     }
     
     public async Task AddUser(string userXUId, string gameId)
-    {
-        queues[gameId]?.Add(userXUId);
-        await Clients.All.ChangeQueue(gameId, queues[gameId]);
-        var thatGame = ctx.Games.First(k => k.Id == gameId);
-        if (queues[gameId]?.Count > thatGame.MinPlayersCount)
-        {
-            var thisServer = ctx.Servers.First(k => k.GameId == gameId);
-            thisServer.IsInUse = true;
-            ctx.Servers.Update(thisServer);
-        }
-    }
+        => await service.AddUser(userXUId, gameId);
 
     public async Task RemoveUser(string userXUId, string gameId)
-    {
-        await service.ChangeQueue(userXUId, gameId);
-        queues[gameId]?.Remove(userXUId);
-        await Clients.All.ChangeQueue(gameId, queues[gameId]);
-    }
+        => await service.RemoveUser(userXUId, gameId);
 
     // public async Task StartCountdown(string gameId, Server server)
     // {
