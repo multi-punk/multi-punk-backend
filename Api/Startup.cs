@@ -2,19 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
 using Api.Auth;
-using Api.Middleware;
 using Api.Hubs;
-using App.Contracts.Hubs;
-using App.Contracts;
-using App.Queue;
 
 namespace Api;
 
 public class Startup
 {
     private readonly IConfiguration configuration;
-    private List<string> users = new ();
     private string? connectionString = null;
+    
     public Startup()
     {
         configuration = new ConfigurationBuilder()
@@ -57,10 +53,7 @@ public class Startup
         {
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Employee API V1");
-            });
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "multi-punk-api") );
         }
 
         app.UseRouting();

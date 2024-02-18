@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using App.Contracts.Hubs;
 using Infrastructure.Database;
 using App.Contracts;
+using Domain;
 
 namespace Api.Hubs;
 
@@ -16,7 +17,7 @@ public sealed class QueueHub: Hub<IQueueHub>
     public QueueHub(TempDataProvider dataProvider, AppDbContext ctx, IQueueService service)
     {
         this.service = service;
-        queues = dataProvider.Queues;
+        queues = dataProvider.UsersInGames;
         this.ctx = ctx;
     }
 
@@ -31,13 +32,4 @@ public sealed class QueueHub: Hub<IQueueHub>
 
     public async Task RemoveUser(string userXUId, string gameId)
         => await service.RemoveUser(userXUId, gameId);
-
-    // public async Task StartCountdown(string gameId, Server server)
-    // {
-    //     await Clients.All.StartCountdown(gameId, queues[gameId], server);
-    // }
-    // public async Task StopCountdown(string gameId)
-    // {
-    //     await Clients.All.StopCountdown(gameId, queues[gameId]);
-    // }
 }

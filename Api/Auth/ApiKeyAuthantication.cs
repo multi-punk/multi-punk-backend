@@ -16,9 +16,8 @@ public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOpt
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         AppDbContext ctx
-    ) : base(options, logger, encoder, clock)
+    ) : base(options, logger, encoder)
     {
         this.ctx = ctx;
     }

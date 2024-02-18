@@ -13,6 +13,7 @@ using App.Queue;
 using App.Servers;
 using App.Statistics;
 using App.Users;
+using Domain;
 using Infrastructure.Database;
 
 namespace Api;

@@ -9,7 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
@@ -20,6 +20,7 @@
       <ProjectReference Include="..\Infrastructure.Database\Infrastructure.Database.csproj" />
       <ProjectReference Include="..\Api.Hubs\Api.Hubs.csproj" />
       <ProjectReference Include="..\App.Contracts\App.Contracts.csproj" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
   
   </Project>

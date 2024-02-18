@@ -3,67 +3,77 @@ using App.Contracts;
 using Infrastructure.Database;
 using Microsoft.AspNetCore.SignalR;
 using Api.Hubs;
-using App.Contracts.Types;
+using Domain;
+using Microsoft.EntityFrameworkCore;
+using App.Contracts.Servers;
+using Infrastructure.Database.Tables;
+using System.Text.Json;
 
 namespace App.Queue;
 
-
-
-public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider): IQueueService
+public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider, IServerReader serverReader, IServerWriter serverWriter): IQueueService
 {
-    private Dictionary<string, List<string>> queue = provider.Queues;
+    private Dictionary<string, List<string>> usersInGames = provider.UsersInGames;
+
     public async Task AddUser(string userXUId, string gameId)
     {
-        var server = ctx
-            .Servers
-            .FirstOrDefault(s => s.GameId == gameId && !s.IsInUse);
-        if (server == null) return;
+        if(usersInGames[gameId].Any(x => x == userXUId)) return;
+
         var game = ctx
             .Games
-            .FirstOrDefault(k => k.Id == gameId);
-        queue[gameId].Add(userXUId);
-        if (queue[gameId].Count() == game.MinPlayersCount)
+            .FirstOrDefault(x => x.Id == gameId);
+
+        usersInGames[gameId].Add(userXUId);
+        Server freeServer = await serverReader.GetFreeServer(gameId);
+        Console.WriteLine(JsonSerializer.Serialize(usersInGames));
+
+        if(usersInGames[gameId].Count >= game.MinPlayersCount && freeServer is not null) 
         {
-            server.IsInUse = true;
-            ctx.Servers.Update(server);
-            await hub
-                .Clients
-                .All
-                .StartCountdown(gameId, queue[gameId], server);
+            provider.Queues.Add(new GameQueue(game, freeServer.Id, CountDown, AfterCountDown));
+            await serverWriter.ReserveServer(freeServer.Id);
         }
-        else
-            await hub
-                .Clients
-                .All
-                .ChangeQueue(gameId, queue[gameId]);
-        
-        await ctx.SaveChangesAsync();
+        await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
+    
     public async Task RemoveUser(string userXUId, string gameId)
     {
-        var server = ctx
-            .Servers
-            .FirstOrDefault(s => s.GameId == gameId && s.IsInUse);
-        if (server == null) return;
         var game = ctx
             .Games
-            .FirstOrDefault(k => k.Id == gameId);
-        queue[gameId].Remove(userXUId);
-        if (queue[gameId].Count() < game.MinPlayersCount)
+            .FirstOrDefault(x => x.Id == gameId);
+
+        usersInGames[gameId].Remove(userXUId);
+        Console.WriteLine(JsonSerializer.Serialize(usersInGames));
+        await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
+
+        if(usersInGames[gameId].Count < game.MinPlayersCount) 
         {
-            server.IsInUse = false;
-            ctx.Servers.Update(server);
-            await hub
-                .Clients
-                .All
-                .StopCountdown(gameId, queue[gameId]);
+            var q = provider
+                .Queues
+                .Find(x => x.GameId == gameId);
+            if(q is null) return;
+            q.StopQueue();
+            provider.Queues.Remove(q);
+            await serverWriter.ExemptServer(q.ServerId);
+            await hub.Clients.All.StopCountdown(gameId, usersInGames[gameId]);
         }
-        else
-            await hub
-                .Clients
-                .All
-                .ChangeQueue(gameId, queue[gameId]);
-        
-        await ctx.SaveChangesAsync();
+    }
+
+    private async void CountDown(int time)
+    {
+        await hub.Clients.All.Countdown($"time: {time}", ["da"]);
+        Thread.Sleep(1000);
+    }
+    private async void AfterCountDown(int usersCountToTransfer, string gameId)
+    {
+        var usersToTransfer = usersInGames[gameId].Take(usersCountToTransfer);
+        usersInGames[gameId].RemoveAll(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
+        var q = provider
+            .Queues
+            .Find(x => x.GameId == gameId);
+        var server = await ctx
+            .Servers
+            .FirstOrDefaultAsync(x => x.Id == q.ServerId);
+        await hub.Clients.All.Transfer(server , usersToTransfer);
+        await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
 }
