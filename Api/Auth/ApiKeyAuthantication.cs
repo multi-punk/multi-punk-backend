@@ -8,11 +8,11 @@ using Infrastructure.Database.Enums;
 
 namespace Api.Auth;
 
-public class ApiKeyAuthantication: AuthenticationHandler<AuthenticationSchemeOptions>
+public class ApiKeyAuthentication: AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private AppDbContext ctx;
 
-    public ApiKeyAuthantication (
+    public ApiKeyAuthentication (
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,

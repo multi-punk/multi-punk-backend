@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using App.Contracts.Servers;
 using Infrastructure.Database.Tables;
 using System.Text.Json;
+using App.Servers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace App.Queue;
 
-public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider, IServerReader serverReader, IServerWriter serverWriter): IQueueService
+public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider, IServerWriter serverWriter, IServiceScopeFactory scopeFactory): IQueueService
 {
     private Dictionary<string, List<string>> usersInGames = provider.UsersInGames;
 
@@ -24,13 +26,11 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
             .FirstOrDefault(x => x.Id == gameId);
 
         usersInGames[gameId].Add(userXUId);
-        Server freeServer = await serverReader.GetFreeServer(gameId);
         Console.WriteLine(JsonSerializer.Serialize(usersInGames));
 
-        if(usersInGames[gameId].Count >= game.MinPlayersCount && freeServer is not null) 
+        if(usersInGames[gameId].Count >= game.MinPlayersCount) 
         {
-            provider.Queues.Add(new GameQueue(game, freeServer.Id, CountDown, AfterCountDown));
-            await serverWriter.ReserveServer(freeServer.Id);
+            provider.Queues.Add(new GameQueue(game, null, CountDown, AfterCountDown));
         }
         await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
@@ -53,16 +53,28 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
             if(q is null) return;
             q.StopQueue();
             provider.Queues.Remove(q);
-            await serverWriter.ExemptServer(q.ServerId);
+            if(q.ServerId is not null)
+                await serverWriter.ExemptServer((int)q.ServerId);
             await hub.Clients.All.StopCountdown(gameId, usersInGames[gameId]);
         }
     }
 
-    private async void CountDown(int time)
+    private async void CountDown(int time, string gameId)
     {
-        await hub.Clients.All.Countdown($"time: {time}", ["da"]);
-        Thread.Sleep(1000);
+        using var scope = scopeFactory.CreateScope();
+        var innerServerReader = scope.ServiceProvider.GetRequiredService<IServerReader>();
+        var innerServerWriter = scope.ServiceProvider.GetRequiredService<IServerWriter>();
+        var innerHub = scope.ServiceProvider.GetRequiredService<IHubContext<QueueHub, IQueueHub>>();
+        var freeServer = await innerServerReader.GetFreeServer(gameId);
+        if(freeServer is null)
+        {
+            await innerHub.Clients.All.Countdown($"получаю сервер", ["da"]);
+            return;
+        } 
+        await innerServerWriter.ReserveServer(freeServer.Id);
+        await innerHub.Clients.All.Countdown($"time: {time}", ["da"]);
     }
+    
     private async void AfterCountDown(int usersCountToTransfer, string gameId)
     {
         var usersToTransfer = usersInGames[gameId].Take(usersCountToTransfer);

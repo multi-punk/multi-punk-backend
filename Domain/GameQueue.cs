@@ -6,20 +6,20 @@ namespace Domain;
 public class GameQueue
 {
     public string GameId { get => game.Id; }
-    public int ServerId { get; }
+    public int? ServerId { get; }
 
     private int queueTimeout = 10;
     private Game game;
     private CancellationTokenSource token;
     private System.Timers.Timer timer;
 
-    private Action<int> action;
+    private Action<int, string> action;
     private Action<int, string> onEndAction;
 
     public GameQueue(
         Game game, 
-        int serverId,  
-        Action<int> action, 
+        int? serverId,  
+        Action<int, string> action, 
         Action<int, string> onEndAction
     )
     {
@@ -46,7 +46,7 @@ public class GameQueue
     {
         queueTimeout--;
         if(queueTimeout == 0) QueueEnd();
-        action(queueTimeout);
+        action(queueTimeout, GameId);
     }
 
     private void QueueEnd()

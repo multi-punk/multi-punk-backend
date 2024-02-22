@@ -43,7 +43,7 @@ public class Startup
             {
                 options.DefaultAuthenticateScheme = "MULTI-API-KEY";
                 options.DefaultChallengeScheme = "MULTI-API-KEY";
-            }).AddScheme<AuthenticationSchemeOptions, ApiKeyAuthantication>("MULTI-API-KEY", options => { });
+            }).AddScheme<AuthenticationSchemeOptions, ApiKeyAuthentication>("MULTI-API-KEY", options => { });
     }
 
 
