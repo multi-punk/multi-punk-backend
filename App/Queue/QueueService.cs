@@ -30,7 +30,7 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
 
         if(usersInGames[gameId].Count >= game.MinPlayersCount) 
         {
-            provider.Queues.Add(new GameQueue(game, null, CountDown, AfterCountDown));
+            provider.Queues.Add(new GameQueue(game, null, AfterCountDown, CountDown));
         }
         await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
@@ -59,33 +59,58 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
         }
     }
 
-    private async void CountDown(int time, string gameId)
+    private async Task<int> CountDown(int time, string gameId, int usersCountToTransfer, GameQueue queue)
     {
-        using var scope = scopeFactory.CreateScope();
-        var innerServerReader = scope.ServiceProvider.GetRequiredService<IServerReader>();
-        var innerServerWriter = scope.ServiceProvider.GetRequiredService<IServerWriter>();
-        var innerHub = scope.ServiceProvider.GetRequiredService<IHubContext<QueueHub, IQueueHub>>();
-        var freeServer = await innerServerReader.GetFreeServer(gameId);
-        if(freeServer is null)
+        var scope = scopeFactory.CreateScope();
+        var ServiceProvider = scope.ServiceProvider;
+
+        var innerHub = ServiceProvider.GetRequiredService<IHubContext<QueueHub, IQueueHub>>();
+
+        var innerServerReader = ServiceProvider.GetRequiredService<IServerReader>();
+        var innerServerWriter = ServiceProvider.GetRequiredService<IServerWriter>();
+        
+        var usersToTransfer = usersInGames[gameId].Take(usersCountToTransfer);
+
+        if(queue.ServerId is null)
         {
-            await innerHub.Clients.All.Countdown($"получаю сервер", ["da"]);
-            return;
-        } 
-        await innerServerWriter.ReserveServer(freeServer.Id);
-        await innerHub.Clients.All.Countdown($"time: {time}", ["da"]);
+            var freeServer = await innerServerReader.GetFreeServer(gameId);
+            
+            if(freeServer is null)
+            {
+                await innerHub.Clients.All.AwaitForServer(gameId, usersToTransfer);
+                return time;
+            }
+            else
+            {
+                queue.ServerId = freeServer.Id;
+                await innerServerWriter.ReserveServer(freeServer.Id); 
+            }
+        }
+
+        await innerHub.Clients.All.Countdown(gameId, time, usersToTransfer);
+
+        time = time - 1;
+
+        return time;
     }
     
-    private async void AfterCountDown(int usersCountToTransfer, string gameId)
+    private async Task AfterCountDown(int usersCountToTransfer, string gameId)
     {
+        var scope = scopeFactory.CreateScope();
+        var ServiceProvider = scope.ServiceProvider;
+
+        var innerHub = ServiceProvider.GetRequiredService<IHubContext<QueueHub, IQueueHub>>();
+        var innerCtx = ServiceProvider.GetRequiredService<AppDbContext>();
+
         var usersToTransfer = usersInGames[gameId].Take(usersCountToTransfer);
-        usersInGames[gameId].RemoveAll(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
         var q = provider
             .Queues
             .Find(x => x.GameId == gameId);
-        var server = await ctx
+        var server = await innerCtx
             .Servers
             .FirstOrDefaultAsync(x => x.Id == q.ServerId);
-        await hub.Clients.All.Transfer(server , usersToTransfer);
-        await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
+        await innerHub.Clients.All.Transfer(server , usersToTransfer);
+        usersInGames[gameId].RemoveAll(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
+        await innerHub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
 }
