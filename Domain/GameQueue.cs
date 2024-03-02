@@ -10,7 +10,6 @@ public class GameQueue
 
     private int queueTimeout = 10;
     private Game game;
-    private CancellationTokenSource token;
     private System.Timers.Timer timer;
 
     private Func<int, string, Task> onEndAction;
@@ -34,11 +33,10 @@ public class GameQueue
             Enabled = true
         };
 
-        token = new CancellationTokenSource();
-        StartQueue(token.Token);
+        StartQueue();
     }
 
-    private void StartQueue(CancellationToken token)
+    private void StartQueue()
     { 
         timer.Elapsed += QueueStep;
         Console.WriteLine("im here");
@@ -59,7 +57,6 @@ public class GameQueue
 
     public void StopQueue()
     {
-        token.Cancel();
         timer.Stop();
         timer.Dispose();
     }

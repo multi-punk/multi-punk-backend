@@ -13,15 +13,15 @@ namespace Api.Controllers;
 [Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
 public class ServersController(ServerWriter serverWriter) : ControllerBase
 {
-    [HttpGet("reserve")]
-    public async Task<IActionResult> ReserveServer([FromQuery] int serverId)
+    [HttpGet("{serverId}/reserve")]
+    public async Task<IActionResult> ReserveServer(int serverId)
     {
         await serverWriter.ReserveServer(serverId);
         return Ok();
     }
 
-    [HttpGet("exempt")]
-    public async Task<IActionResult> ExemptServer([FromQuery] int serverId)
+    [HttpGet("{serverId}/exempt")]
+    public async Task<IActionResult> ExemptServer(int serverId)
     {
         await serverWriter.ExemptServer(serverId);
         return Ok();
