@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using App.Contracts.Servers;
 using Microsoft.Extensions.DependencyInjection;
 using App.Contracts.Games;
+using System.Text.Json;
 
 namespace App.Queue;
 
@@ -25,7 +26,7 @@ public class QueueService(
     public async Task AddUser(string gameId, params string[] userXUId)
     {
         userXUId = userXUId
-            .Where(x => usersInGames[gameId].Contains(x))
+            .Where(x => !usersInGames[gameId].Contains(x))
             .ToArray();
         if(!userXUId.Any()) return;
 
@@ -33,9 +34,8 @@ public class QueueService(
 
         usersInGames[gameId].AddRange(userXUId);
         if(usersInGames[gameId].Count >= game.MinPlayersCount) 
-        {
             provider.Queues.Add(new GameQueue(game, null, AfterCountDown, CountDown));
-        }
+
         await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
     
