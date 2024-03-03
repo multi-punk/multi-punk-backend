@@ -5,17 +5,15 @@ using System.Threading.Tasks;
 using App.Contracts.Users;
 using Infrastructure.Database;
 using Infrastructure.Database.Tables;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Users;
 
 public class UserReader(AppDbContext ctx) : IUserReader
 {
     public async Task<IEnumerable<User>> GetAllUsers()
-        => ctx.Users.ToList();
+        => await ctx.Users.ToListAsync();
 
     public async Task<User> GetUser(string userId)
-    {
-        User user = await ctx.Users.FindAsync(userId);
-        return user;
-    }
+        => await ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
 }

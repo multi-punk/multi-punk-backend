@@ -27,9 +27,12 @@ public sealed class QueueHub: Hub<IQueueHub>
             await Clients.Caller.ChangeQueue(game.Id, queues[game.Id]);
     }
     
-    public async Task AddUser(string userXUId, string gameId)
-        => await service.AddUser(userXUId, gameId);
+    public async Task AddUser(string gameId, string userXUId)
+        => await service.AddUser(gameId, userXUId);
 
-    public async Task RemoveUser(string userXUId, string gameId)
-        => await service.RemoveUser(userXUId, gameId);
+    public async Task RemoveUser(string gameId, string userXUId)
+        => await service.RemoveUser(gameId, userXUId);
+
+    public async Task RemoveUserFromAllGames(string userXUId)
+        => await service.RemoveUserFromAllGames(userXUId);
 }

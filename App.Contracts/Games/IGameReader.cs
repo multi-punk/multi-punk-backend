@@ -9,4 +9,5 @@ namespace App.Contracts.Games;
 public interface IGameReader
 {
     Task<IEnumerable<Game>> GetAllGames();
+    Task<Game> GetGameById(string gameId);
 }

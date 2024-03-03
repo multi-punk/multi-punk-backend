@@ -8,6 +8,7 @@ namespace App.Contracts;
 
 public interface IQueueService
 {
-    Task AddUser(string userXUId, string gameId);
-    Task RemoveUser(string userXUid, string gameId);
+    Task AddUser(string gameId, params string[] userXUId);
+    Task RemoveUser(string gameId, params string[] userXUid);
+    Task RemoveUserFromAllGames(string userXUId);
 }

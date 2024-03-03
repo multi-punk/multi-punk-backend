@@ -6,28 +6,32 @@ using Api.Hubs;
 using Domain;
 using Microsoft.EntityFrameworkCore;
 using App.Contracts.Servers;
-using Infrastructure.Database.Tables;
-using System.Text.Json;
-using App.Servers;
 using Microsoft.Extensions.DependencyInjection;
+using App.Contracts.Games;
 
 namespace App.Queue;
 
-public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub, TempDataProvider provider, IServerWriter serverWriter, IServiceScopeFactory scopeFactory): IQueueService
+public class QueueService(
+    AppDbContext ctx, 
+    IHubContext<QueueHub, IQueueHub> hub, 
+    TempDataProvider provider, 
+    IServerWriter serverWriter, 
+    IServiceScopeFactory scopeFactory, 
+    IGameReader gameReader
+): IQueueService
 {
     private Dictionary<string, List<string>> usersInGames = provider.UsersInGames;
 
-    public async Task AddUser(string userXUId, string gameId)
+    public async Task AddUser(string gameId, params string[] userXUId)
     {
-        if(usersInGames[gameId].Any(x => x == userXUId)) return;
+        userXUId = userXUId
+            .Where(x => usersInGames[gameId].Contains(x))
+            .ToArray();
+        if(userXUId.Any()) return;
 
-        var game = ctx
-            .Games
-            .FirstOrDefault(x => x.Id == gameId);
+        var game = await gameReader.GetGameById(gameId);
 
-        usersInGames[gameId].Add(userXUId);
-        Console.WriteLine(JsonSerializer.Serialize(usersInGames));
-
+        usersInGames[gameId].AddRange(userXUId);
         if(usersInGames[gameId].Count >= game.MinPlayersCount) 
         {
             provider.Queues.Add(new GameQueue(game, null, AfterCountDown, CountDown));
@@ -35,14 +39,13 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
         await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
     
-    public async Task RemoveUser(string userXUId, string gameId)
+    public async Task RemoveUser(string gameId, params string[] userXUId)
     {
         var game = ctx
             .Games
             .FirstOrDefault(x => x.Id == gameId);
 
-        usersInGames[gameId].Remove(userXUId);
-        Console.WriteLine(JsonSerializer.Serialize(usersInGames));
+        usersInGames[gameId].RemoveAll(x => userXUId.Contains(x));
         await hub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
 
         if(usersInGames[gameId].Count < game.MinPlayersCount) 
@@ -59,6 +62,13 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
         }
     }
 
+    public async Task RemoveUserFromAllGames(string userXUId)
+    {
+        foreach(var usersInGame in usersInGames)
+            if(usersInGame.Value.Contains(userXUId))
+                await RemoveUser(usersInGame.Key, userXUId);
+    }
+    
     private async Task<int> CountDown(int time, string gameId, int usersCountToTransfer, GameQueue queue)
     {
         var scope = scopeFactory.CreateScope();
@@ -101,16 +111,20 @@ public class QueueService(AppDbContext ctx, IHubContext<QueueHub, IQueueHub> hub
 
         var innerHub = ServiceProvider.GetRequiredService<IHubContext<QueueHub, IQueueHub>>();
         var innerCtx = ServiceProvider.GetRequiredService<AppDbContext>();
+        var queueService = ServiceProvider.GetRequiredService<IQueueService>();
 
         var usersToTransfer = usersInGames[gameId].Take(usersCountToTransfer);
+
         var q = provider
             .Queues
             .Find(x => x.GameId == gameId);
         var server = await innerCtx
             .Servers
             .FirstOrDefaultAsync(x => x.Id == q.ServerId);
+
         await innerHub.Clients.All.Transfer(server , usersToTransfer);
-        usersInGames[gameId].RemoveAll(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
+        var usersToRemove = usersInGames[gameId].Where(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
+        await queueService.RemoveUser(gameId, usersToRemove.ToArray());
         await innerHub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
 }

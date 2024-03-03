@@ -3,6 +3,7 @@ using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
 using Api.Auth;
 using Api.Hubs;
+using App;
 
 namespace Api;
 
@@ -25,6 +26,7 @@ public class Startup
         services.AddSignalR();
 
         services
+            .AddSwaggerGen()
             .RegisterServices()
             .AddSingleton(configuration)
             .AddDbContext<AppDbContext>(c => c.UseNpgsql(connectionString))
@@ -58,9 +60,6 @@ public class Startup
 
         app.UseRouting();
         app.UseCors();
-
-        // app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
-        // app.UseMiddleware<SQLInjectionHandlingMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();
