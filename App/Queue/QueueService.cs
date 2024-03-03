@@ -27,7 +27,7 @@ public class QueueService(
         userXUId = userXUId
             .Where(x => usersInGames[gameId].Contains(x))
             .ToArray();
-        if(userXUId.Any()) return;
+        if(!userXUId.Any()) return;
 
         var game = await gameReader.GetGameById(gameId);
 
