@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using App.Contracts.Servers;
 using App.Servers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "MULTI-API-KEY-PRIVATE")]
-public class ServersController(ServerWriter serverWriter) : ControllerBase
+public class ServersController(IServerWriter serverWriter) : ControllerBase
 {
     [HttpGet("{serverId}/reserve")]
     public async Task<IActionResult> ReserveServer(int serverId)

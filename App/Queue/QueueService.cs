@@ -122,9 +122,12 @@ public class QueueService(
             .Servers
             .FirstOrDefaultAsync(x => x.Id == q.ServerId);
 
+        q.StopQueue();
+        provider.Queues.Remove(q);
+
         await innerHub.Clients.All.Transfer(server , usersToTransfer);
-        var usersToRemove = usersInGames[gameId].Where(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
-        await queueService.RemoveUser(gameId, usersToRemove.ToArray());
+
+        usersInGames[gameId].RemoveAll(x => usersInGames[gameId].Take(usersCountToTransfer).Contains(x));
         await innerHub.Clients.All.ChangeQueue(gameId, usersInGames[gameId]);
     }
 }
